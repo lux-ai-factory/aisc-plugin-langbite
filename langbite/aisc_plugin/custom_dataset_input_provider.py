@@ -2,7 +2,7 @@ import csv
 import io
 import json
 
-from a4s_plugin_interface.input_providers.base_input_provider import BaseInputProvider
+from aisc_plugin_interface.input_providers.base_input_provider import BaseInputProvider
 
 
 class CustomDatasetInputProvider(BaseInputProvider):
