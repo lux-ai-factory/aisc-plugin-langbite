@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12916926.svg)](https://doi.org/10.5281/zenodo.12916926)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10987270.svg)](https://doi.org/10.5281/zenodo.10987270)
 
 # LangBiTe: A Bias Tester framework for LLMs
 
