@@ -2,9 +2,9 @@ import time
 
 from pandas import DataFrame
 
-from a4s_plugin_interface.base_evaluation_plugin import BaseEvaluationPlugin, metric
-from a4s_plugin_interface.input_providers.base_input_provider import BaseInputProvider
-from a4s_plugin_interface.models.measure import Measure
+from aisc_plugin_interface import BaseEvaluationPlugin, metric
+from aisc_plugin_interface.input_providers.base_input_provider import BaseInputProvider
+from aisc_plugin_interface.models.measure import Measure
 from langbite.a4s_plugin.custom_dataset_input_provider import CustomDatasetInputProvider
 from langbite.a4s_plugin.models import ConfigFormSchema, LanguageEnum
 from langbite.a4s_plugin.ui_schema import ui_schema
