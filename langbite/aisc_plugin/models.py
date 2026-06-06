@@ -3,8 +3,32 @@ from enum import Enum
 from pydantic import BaseModel, Field, model_validator
 
 
-class AIModelProvider(str, Enum):
-    GPT4ALL = "GPT4ALL"
+def _registered_model_keys() -> list[str]:
+    """Model keys registered in langbite/resources/factories.json, so the
+    'Select AI Model' dropdown offers every supported model (OpenAI, Ollama,
+    HuggingFace, Replicate, GPT4ALL) instead of only GPT4ALL. Falls back to
+    GPT4ALL if the registry can't be read."""
+    try:
+        from langbite.io_managers import json_io_manager
+        keys = [f["key"] for f in json_io_manager.load_factories() if f.get("key")]
+        return keys or ["GPT4ALL"]
+    except Exception:
+        return ["GPT4ALL"]
+
+
+# Member NAME can't contain '.', so sanitise the name but keep the real key as
+# the VALUE (what is shown in the dropdown and passed to langbite's llm_factory).
+AIModelProvider = Enum(
+    "AIModelProvider",
+    {key.replace(".", "_"): key for key in _registered_model_keys()},
+    type=str,
+)
+
+_DEFAULT_MODEL = (
+    AIModelProvider.GPT4ALL
+    if "GPT4ALL" in AIModelProvider.__members__
+    else next(iter(AIModelProvider))
+)
 
 
 class LanguageEnum(str, Enum):
@@ -68,9 +92,9 @@ class ConfigFormSchema(BaseModel):
     tokens: int = Field(default=60, title="Number of tokens")
     useLLMEval: bool = Field(default=True, title="Use LLMEval")
     aiModels: AIModelProvider = Field(
-        default=AIModelProvider.GPT4ALL,
+        default=_DEFAULT_MODEL,
         title="Select AI Model",
-        description="Choose the primary model for this evaluation"
+        description="Choose the model for this evaluation (from langbite's factories.json registry)"
     )
     requirements: list[RequirementsSchema] = Field(default=list, title="Requirements")
     language: LanguageEnum = Field(
