@@ -102,7 +102,7 @@ class ConfigFormSchema(BaseModel):
         description="API key for the selected model's provider (OpenAI / HuggingFace / Replicate). "
                     "For Ollama, put the base URL here. Leave blank for GPT4ALL (runs locally)."
     )
-    requirements: list[RequirementsSchema] = Field(default=list, title="Requirements")
+    requirements: list[RequirementsSchema] = Field(default_factory=list, title="Requirements")
     language: LanguageEnum = Field(
         default=LanguageEnum.en_us,
         title="Language to run"
