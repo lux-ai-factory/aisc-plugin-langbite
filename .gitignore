@@ -30,4 +30,6 @@ __pycache__
 # playground files
 __playground
 
-.ideabuild/
+.idea
+build/
+*.egg-info/
