@@ -1,5 +1,8 @@
 ui_schema = {
     "ui:spacing": 3,
+    "model_credential": {
+        "ui:widget": "password"
+    },
     "requirements": {
         "ui:options": {
             "addable": True,
