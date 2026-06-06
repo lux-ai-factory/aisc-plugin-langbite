@@ -113,7 +113,20 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
         })
         langbite.generate()
         langbite.execute()
-        report = langbite.report()
+        try:
+            report = langbite.report()
+        except KeyError as exc:
+            # report() groups the results DataFrame by 'Provider','Concern',… ;
+            # if NO prompts matched the run it is empty and raises KeyError. That
+            # happens when a requirement's concern/inputs/reflections don't match
+            # any prompt in the uploaded dataset. Give an actionable message
+            # instead of the cryptic KeyError.
+            return _error_result(
+                "No prompts matched the configuration, so no results were produced. "
+                "Check that each requirement's 'concern', 'inputs' and 'reflections' "
+                "match the prompts in your uploaded dataset (e.g. the dataset's "
+                f"input_type/reflection_type columns). [langbite: empty results, {exc}]"
+            )
 
         # Normalise LangBiTe's report (global_eval DataFrame) into JSON records so
         # the metrics below can consume a plain dict.
