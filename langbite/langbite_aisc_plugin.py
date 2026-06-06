@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 from typing import Any
@@ -39,8 +40,34 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
     form_ui_schema = ui_schema
 
     # LangBiTe-native: map the form schema onto the internal config LangBiTe expects.
+    # Map a factories.json provider to the env var langbite's secrets.py reads.
+    _PROVIDER_ENV = {
+        "OPENAI": "API_KEY_OPENAI",
+        "HUGGINGFACE": "API_KEY_HUGGINGFACE",
+        "REPLICATE": "API_KEY_REPLICATE",
+        "OLLAMA": "OLLAMA_URL",
+    }
+
+    def _apply_credential(self, model_key: str, credential: str) -> None:
+        """Inject the form's API key into the env for the selected model's
+        provider, so langbite works without any platform/env-file change. The
+        engine reads keys via os.environ in this same process."""
+        if not credential:
+            return
+        try:
+            from langbite.io_managers import json_io_manager
+            providers = {f.get("key"): (f.get("provider") or "") for f in json_io_manager.load_factories()}
+        except Exception:
+            providers = {}
+        env_name = self._PROVIDER_ENV.get(providers.get(model_key, "").upper())
+        if env_name:
+            os.environ[env_name] = credential
+
     def form_schema_to_internal(self, config_form_data: ConfigFormSchema) -> dict:
         config_data = config_form_data.model_dump()
+        # The credential is injected via env (see _apply_credential); don't pass
+        # it into the langbite engine config or leak it into config snapshots.
+        config_data.pop("model_credential", None)
         config_data["aiModels"] = [config_data["aiModels"]]
         for requirement in config_data["requirements"]:
             communities = {}
@@ -65,6 +92,9 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
         from langbite.langbite import LangBiTeForAPI
 
         config: ConfigFormSchema = self.validate_config_form_data(config_data)
+        # Make the form's API key available to the selected provider (no env-file
+        # or platform change needed).
+        self._apply_credential(config.aiModels.value, config.model_credential)
         langbite_config = self.form_schema_to_internal(config)
         input_language = langbite_config["language"]
 

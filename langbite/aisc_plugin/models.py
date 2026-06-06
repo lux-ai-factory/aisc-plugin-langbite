@@ -96,6 +96,12 @@ class ConfigFormSchema(BaseModel):
         title="Select AI Model",
         description="Choose the model for this evaluation (from langbite's factories.json registry)"
     )
+    model_credential: str = Field(
+        default="",
+        title="API Key",
+        description="API key for the selected model's provider (OpenAI / HuggingFace / Replicate). "
+                    "For Ollama, put the base URL here. Leave blank for GPT4ALL (runs locally)."
+    )
     requirements: list[RequirementsSchema] = Field(default=list, title="Requirements")
     language: LanguageEnum = Field(
         default=LanguageEnum.en_us,
