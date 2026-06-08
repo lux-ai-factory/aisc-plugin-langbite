@@ -15,10 +15,10 @@ from aisc_plugin_interface import (
 )
 from aisc_plugin_interface.models.measure import Measure
 
-from langbite.aisc_plugin.artifact_csv import global_eval_to_csv_bytes
-from langbite.aisc_plugin.custom_dataset_input_provider import CustomDatasetInputProvider
-from langbite.aisc_plugin.models import ConfigFormSchema, LanguageEnum
-from langbite.aisc_plugin.ui_schema import ui_schema
+from .artifact_csv import global_eval_to_csv_bytes
+from .custom_dataset_input_provider import CustomDatasetInputProvider
+from .models import ConfigFormSchema, LanguageEnum
+from .ui_schema import ui_schema
 
 DATASET_INPUT = "dataset"
 
