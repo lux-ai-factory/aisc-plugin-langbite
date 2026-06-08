@@ -15,6 +15,7 @@ from aisc_plugin_interface import (
 )
 from aisc_plugin_interface.models.measure import Measure
 
+from langbite.aisc_plugin.artifact_csv import global_eval_to_csv_bytes
 from langbite.aisc_plugin.custom_dataset_input_provider import CustomDatasetInputProvider
 from langbite.aisc_plugin.models import ConfigFormSchema, LanguageEnum
 from langbite.aisc_plugin.ui_schema import ui_schema
@@ -135,7 +136,7 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
             global_records = global_eval.to_dict(orient="records")
             self.upload_artifact(
                 "global_evaluation.csv",
-                global_eval.to_csv(index=False, sep=";").encode(),
+                global_eval_to_csv_bytes(global_eval),
             )
         else:
             global_records = list(global_eval) if global_eval else []
