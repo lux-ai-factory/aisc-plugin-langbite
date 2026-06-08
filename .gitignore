@@ -31,3 +31,5 @@ __pycache__
 __playground
 
 .idea
+build/
+*.egg-info/
