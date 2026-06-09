@@ -1,3 +1,17 @@
+<!-- AISC-PLUGIN-FORK-BANNER -->
+> ⚠️ **AI Assessment Sandbox Configurator (aisc) plugin fork.**
+>
+> This repository is the **aisc plugin build of LangBiTe**: the original LangBiTe project, forked and
+> extended with the integration layer (plugin hooks plus the mapping of LangBiTe's outputs to the
+> platform's shared data model) so it can be installed and run as a plugin in aisc. The
+> aisc-specific code and configuration live alongside the upstream sources.
+>
+> **Everything below the line is the original, unmodified LangBiTe README.**
+
+---
+
+<!-- ===== ORIGINAL LangBiTe README BELOW ===== -->
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10987270.svg)](https://doi.org/10.5281/zenodo.10987270)
 
 # LangBiTe: A Bias Tester framework for LLMs
