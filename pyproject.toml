@@ -26,4 +26,4 @@ build-backend = "hatchling.build"
 # langbite's subpackages (io_managers, llm_services, ...), breaking the plugin
 # at eval time. Bundle the whole package tree explicitly.
 [tool.hatch.build.targets.wheel]
-packages = ["langbite"]
+packages = ["langbite", "aisc_plugin_langbite"]
