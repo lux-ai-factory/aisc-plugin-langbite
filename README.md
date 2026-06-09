@@ -1,10 +1,10 @@
-<!-- AISC-PLUGIN-FORK-BANNER -->
-> ⚠️ **AI Assessment Sandbox Configurator (aisc) plugin fork.**
+<!-- PLUGIN-FORK-BANNER -->
+> **AI Assessment Sandbox Configurator — plugin fork.**
 >
-> This repository is the **aisc plugin build of LangBiTe**: the original LangBiTe project, forked and
-> extended with the integration layer (plugin hooks plus the mapping of LangBiTe's outputs to the
-> platform's shared data model) so it can be installed and run as a plugin in aisc. The
-> aisc-specific code and configuration live alongside the upstream sources.
+> This repository is the plugin build of LangBiTe: the original LangBiTe project, forked and extended
+> with the integration layer (plugin hooks plus the mapping of LangBiTe's outputs to the Configurator's
+> shared data model) so it can be installed and run as a plugin in the generated sandbox environment. The plugin-specific
+> code and configuration live alongside the upstream sources.
 >
 > **Everything below the line is the original, unmodified LangBiTe README.**
 
