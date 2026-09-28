@@ -129,12 +129,15 @@ class Prompt:
     def set_oracle_reinforce_failed_evaluation(self, reinforce: bool):
         self.__oracle.reinforce_failed = reinforce
     
-    def execute(self, llmservice: LLMService):
-        # execute prompt instances and collect responses
+    def execute(self, llmservice: LLMService, history=None):
+        # execute prompt instances and collect responses; each instance is sent
+        # in its own call, after the same (optional) conversation history
         responses = []
         for instance in self.instances:
             prompt = self.__get_instantiated_prompt(instance)
-            response = llmservice.execute_prompt(prompt)
+            # without a history, keep the one-argument call so services written
+            # against the old execute_prompt(prompt) signature still work
+            response = llmservice.execute_prompt(prompt, history) if history else llmservice.execute_prompt(prompt)
             responses.append(PromptResponse(instance, response))
         self.__responses = responses
 

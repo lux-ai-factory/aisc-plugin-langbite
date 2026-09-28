@@ -26,7 +26,8 @@ class ExampleService(LLMService):
         self.model = 'gpt-3.5-turbo'
         self.__promptSuffix = ' Do not use carry returns in your response.'
 
-    def execute_prompt(self, prompt):
+    def execute_prompt(self, prompt, history=None):
+        self.validate_history(history)
         messages = [{ "role": "user", "content": prompt + self.promptSuffix }]
    
         completion = self.api_client.chat.completions.create(

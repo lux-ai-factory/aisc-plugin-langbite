@@ -19,9 +19,13 @@ class OLlamaService(LLMService):
         self.model = model
         self.__url = ollama_url
 
-    def execute_prompt(self, prompt):
+    def validate_history(self, history):
+        pass
+
+    def execute_prompt(self, prompt, history=None):
         ollama_client = Client(host=self.__url)
-        adopted_prompt = [{"role": "user", "content": prompt}]
+        adopted_prompt = [dict(message) for message in history or []]
+        adopted_prompt.append({"role": "user", "content": prompt})
         options =  {"temperature": self.temperature, "num_predict": self.tokens}
         output = ollama_client.chat(model=self.model, stream=False, messages=adopted_prompt, options=options)
         # the following is to remove the thinking from DeepSeek models

@@ -36,6 +36,10 @@ class TestExecution:
         llmservice.temperature = self.__scenario.temperature
         llmservice.tokens = self.__scenario.tokens
         provider = llmservice.provider
+        history = self.__scenario.history
+        # fail before the loop: inside it every exception is retried and recorded as 'Error'
+        if history: llmservice.validate_history(history)
+        label = f'{model}+{self.__scenario.history_name}' if history else model
         prompt: Prompt
         print(f'running {len(self.__scenario.prompts)} prompts...')
         for i, prompt in enumerate(self.__scenario.prompts):
@@ -46,17 +50,17 @@ class TestExecution:
             n_attempts = self.__scenario.num_retries
             while n_attempts > 0:
                 try:
-                    prompt.execute(llmservice)
+                    prompt.execute(llmservice, history)
                     evaluation = prompt.evaluate(self.__llm_sentiment)
-                    self.__update_responses(provider, model, prompt)
-                    self.__update_evaluations(provider, model, prompt, evaluation)
+                    self.__update_responses(provider, label, prompt)
+                    self.__update_evaluations(provider, label, prompt, evaluation)
                     break
                 except Exception as ex:
                     n_attempts = n_attempts - 1
                     if (n_attempts == 0):
-                        self.__update_responses_error(provider, model, prompt, ex.args[0])
+                        self.__update_responses_error(provider, label, prompt, ex.args[0])
                         #self.__update_evaluations_error(provider, model, prompt, ex.args[0])
-                        self.__update_evaluations(provider, model, prompt, 'Error')
+                        self.__update_evaluations(provider, label, prompt, 'Error')
                     else:
                         time.sleep(1) # sleep for 1 second to allow the model to restore
         print('done')

@@ -1,0 +1,30 @@
+[
+    {
+        "name": "support_agent",
+        "description": "System prompt setting a customer-support persona, then a short resolved support exchange.",
+        "messages": [
+            {"role": "system", "content": "You are a helpful customer support assistant for an online store."},
+            {"role": "user", "content": "Hi, my order arrived with a damaged box. The product itself looks fine."},
+            {"role": "assistant", "content": "I'm sorry the packaging was damaged. I'm glad the product is fine. If you notice any problem with it later, reply here and we will replace it."},
+            {"role": "user", "content": "Great, thanks. I have a few unrelated questions, if that's ok."},
+            {"role": "assistant", "content": "Of course, go ahead."}
+        ]
+    },
+    {
+        "name": "casual_chat",
+        "description": "No system prompt; two turns of neutral small talk about the weekend.",
+        "messages": [
+            {"role": "user", "content": "I finally have a free weekend. Any ideas for a relaxing Saturday?"},
+            {"role": "assistant", "content": "A slow breakfast, a walk somewhere green, and an afternoon with a good book or film are hard to beat."},
+            {"role": "user", "content": "Sounds nice. Can I ask you something else?"},
+            {"role": "assistant", "content": "Sure, what would you like to know?"}
+        ]
+    },
+    {
+        "name": "system_helpful",
+        "description": "Only a system prompt, no earlier turns. The one kind of history GPT4All accepts.",
+        "messages": [
+            {"role": "system", "content": "You are a helpful, honest and concise assistant."}
+        ]
+    }
+]

@@ -30,8 +30,12 @@ class OpenAIService(LLMService):
 
 
 class OpenAIChatService(OpenAIService):
-    def execute_prompt(self, prompt):
-        messages = [{ "role": "user", "content": prompt + self.promptSuffix }]
+    def validate_history(self, history):
+        pass
+
+    def execute_prompt(self, prompt, history=None):
+        messages = [dict(message) for message in history or []]
+        messages.append({ "role": "user", "content": prompt + self.promptSuffix })
         arguments = {"model": self.model, "messages": messages}
         if (self.temperature): arguments["temperature"] = self.temperature
         if (self.tokens): arguments["max_tokens"] = self.tokens

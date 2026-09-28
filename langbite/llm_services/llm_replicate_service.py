@@ -21,7 +21,8 @@ class ReplicateService(LLMService):
         self.model = model
         os.environ['REPLICATE_API_TOKEN'] = replicate_api_key
 
-    def execute_prompt(self, prompt):
+    def execute_prompt(self, prompt, history=None):
+        self.validate_history(history)
         answer = replicate.run(
             self.model,
             input={

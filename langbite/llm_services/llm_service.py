@@ -3,8 +3,14 @@ from abc import abstractmethod
 
 class LLMService:
     @abstractmethod
-    def execute_prompt(self, prompt):
+    def execute_prompt(self, prompt, history=None):
         pass
+
+    # history: optional list of {"role", "content"} messages sent before the prompt.
+    # Services that cannot send one keep this default and raise.
+    def validate_history(self, history):
+        if history:
+            raise NotImplementedError(f'{type(self).__name__} does not support a conversation history')
 
     @property
     def provider(self):

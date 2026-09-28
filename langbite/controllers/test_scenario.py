@@ -2,6 +2,7 @@ from langbite.model.prompt import Prompt
 from langbite.model.ethical_requirement import EthicalRequirements, EthicalRequirement
 from random import sample
 import langbite.utils
+from langbite.io_managers import json_io_manager
 
 class TestScenario:
 
@@ -62,6 +63,14 @@ class TestScenario:
         self.__ethical_requirements = value
 
     @property
+    def history_name(self):
+        return self.__history_name
+
+    @property
+    def history(self):
+        return self.__history
+
+    @property
     def models(self):
         return self.__models
     
@@ -96,6 +105,16 @@ class TestScenario:
         self.ethical_requirements = EthicalRequirements(cfg['requirements']).requirements
         self.languages = self.__set_languages()
         self.models = cfg['aiModels']
+        self.__set_history(cfg.get('history'))
+
+    def __set_history(self, name):
+        self.__history_name = name or None
+        self.__history = None
+        if self.__history_name:
+            histories = json_io_manager.load_histories()
+            if self.__history_name not in histories:
+                raise ValueError(f'Unknown conversation history: {self.__history_name}. Available: {", ".join(histories)}')
+            self.__history = histories[self.__history_name]
     
     def __set_languages(self):
         return langbite.utils.merge_unique([e.languages for e in self.ethical_requirements])
