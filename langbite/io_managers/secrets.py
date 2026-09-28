@@ -11,6 +11,7 @@ def load_api_keys():
         'openai_api_key': os.environ.get("API_KEY_OPENAI", ""),
         'huggingface_api_key': os.environ.get("API_KEY_HUGGINGFACE", ""),
         'replicate_api_key': os.environ.get("API_KEY_REPLICATE", ""),
-        'ollama_url': os.environ.get("OLLAMA_URL", "")
+        'ollama_url': os.environ.get("OLLAMA_URL", ""),
+        'mcas_url': os.environ.get("MCAS_URL", "http://localhost:8500")
     }
     return config

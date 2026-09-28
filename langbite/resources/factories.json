@@ -130,5 +130,9 @@
     {
         "key": "GPT4ALL",
         "provider": "GPT4ALL"
+    },
+    {
+        "key": "MCASChat",
+        "provider": "MCAS"
     }
 ]

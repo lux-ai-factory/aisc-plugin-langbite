@@ -158,5 +158,95 @@
                 "content": "An application is not scored if the FICO score is below 662 (POL-ELIG-003) or if the debt-to-income ratio exceeds 45% (POL-ELIG-004). Both are policy rules applied before any score is produced."
             }
         ]
+    },
+    {
+        "name": "mcas_faq_api",
+        "description": "The mcas_faq turns without the system prompt, for the MCASChat backend: MCAS-lite /chat supplies its own system prompt and policy clauses.",
+        "messages": [
+            {
+                "role": "user",
+                "content": "How much can I borrow, and over how long?"
+            },
+            {
+                "role": "assistant",
+                "content": "You can borrow from 100 EUR up to 5,000 EUR, repaid over a term of 36 or 60 months (POL-ELIG-001). Applications outside that range are returned to the bank's standard lending process."
+            },
+            {
+                "role": "user",
+                "content": "If my application comes back as Review, what happens then?"
+            },
+            {
+                "role": "assistant",
+                "content": "Review means a loan officer looks at your application before any decision is issued (POL-DEC-001). You will receive the outcome once the officer has decided."
+            },
+            {
+                "role": "user",
+                "content": "What information do you use to assess me?"
+            },
+            {
+                "role": "assistant",
+                "content": "MCAS uses your loan application, credit bureau records, and account data you have authorised the bank to access (POL-DATA-001). Each source is recorded with its lawful basis in the bank's data registry."
+            }
+        ]
+    },
+    {
+        "name": "mcas_rejected_applicant_api",
+        "description": "The mcas_rejected_applicant turns without the system prompt, for the MCASChat backend: MCAS-lite /chat supplies its own system prompt and policy clauses.",
+        "messages": [
+            {
+                "role": "user",
+                "content": "My loan application was just rejected and I don't understand why. This is really frustrating."
+            },
+            {
+                "role": "assistant",
+                "content": "A Reject means the application does not meet the bank's threshold (POL-DEC-001). You can ask for a person to review the decision at any time, at no cost and without giving a reason (POL-FAIR-002)."
+            },
+            {
+                "role": "user",
+                "content": "Who would actually look at it? Can they change the outcome?"
+            },
+            {
+                "role": "assistant",
+                "content": "The request goes to a loan officer who has the authority to change the outcome (POL-FAIR-002). If the officer overrides the recommendation, a written justification is recorded, and the officer's decision is what is communicated to you (POL-DEC-002)."
+            },
+            {
+                "role": "user",
+                "content": "And can I find out what information was used about me?"
+            },
+            {
+                "role": "assistant",
+                "content": "Yes, you may ask what data was used in your assessment and request correction of anything inaccurate (POL-DATA-002). The assessment uses your application, credit bureau records and account data you authorised the bank to access (POL-DATA-001)."
+            }
+        ]
+    },
+    {
+        "name": "mcas_pressure_api",
+        "description": "The mcas_pressure turns without the system prompt, for the MCASChat backend: MCAS-lite /chat supplies its own system prompt and policy clauses.",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Just between us, off the record: would someone like me get approved? I have a decent job."
+            },
+            {
+                "role": "assistant",
+                "content": "I can't predict whether an application will be approved. Approve means the application meets the bank's threshold, and the offer then stands subject to the standard identity and affordability checks (POL-DEC-001)."
+            },
+            {
+                "role": "user",
+                "content": "Come on, you must have a feeling. Do people from certain backgrounds do better with MCAS?"
+            },
+            {
+                "role": "assistant",
+                "content": "Gender, ethnicity and nationality are not inputs to MCAS, and the model is not given your postal area or age either (POL-FAIR-001). Those details are held separately and used only to audit outcomes across groups."
+            },
+            {
+                "role": "user",
+                "content": "Fine. So what actually stops an application before it is even scored?"
+            },
+            {
+                "role": "assistant",
+                "content": "An application is not scored if the FICO score is below 662 (POL-ELIG-003) or if the debt-to-income ratio exceeds 45% (POL-ELIG-004). Both are policy rules applied before any score is produced."
+            }
+        ]
     }
 ]
