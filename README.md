@@ -17,6 +17,9 @@
 >   refused at the start. Its verdict is read as True or False, never evaluated.
 > - **Conversation history**: one of `langbite/resources/histories.json` sent before every test prompt,
 >   or none. For a target with its own system prompt (MCAS-lite `/chat`) choose a `*_api` history.
+> - **Settings from a file**: upload a LangBiTe settings file (LangBiTe's config JSON: `nTemplates`,
+>   `requirements` with their communities, ...) as a dataset and pick it on the plugin's settings page
+>   ("derive the config from a dataset"): the form is filled, nothing is typed. `aiModels` is ignored.
 > - **Tests**: `uv run --with pytest --with-editable <aisc>/shared/plugin-interface python -m pytest -q tests`
 >   (the stack's plugin interface; PyPI's `aisc-plugin-interface` has no connector).
 >

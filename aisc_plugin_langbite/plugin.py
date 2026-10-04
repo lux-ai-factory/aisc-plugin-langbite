@@ -7,6 +7,7 @@ from pandas import DataFrame
 
 from aisc_plugin_interface import (
     BaseEvaluationPlugin,
+    PluginFeatureFlags,
     InputType,
     TaskProgress,
     evaluation_input,
@@ -45,6 +46,35 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
     plugin_name = "LangBiTe"
     ui_icon = "science"
     form_ui_schema = ui_schema
+
+    @property
+    def feature_flags(self) -> PluginFeatureFlags:
+        # the settings page can fill the form from a LangBiTe settings file (parse_config_from_dataset)
+        return PluginFeatureFlags(can_parse_config_from_dataset=True)
+
+    def parse_config_from_dataset(self, file_content: bytes) -> dict | None:
+        """The form from a LangBiTe settings file (LangBiTe's own config JSON: nTemplates, requirements with
+        communities per language, ...), so a workshop's requirements are not typed in. aiModels and the
+        timestamp are not taken: what is tested is the evaluation's target. Anything else (a prompt file)
+        is no settings file: None."""
+        import json
+        try:
+            raw = json.loads(file_content)
+        except (ValueError, UnicodeDecodeError):
+            return None
+        if not isinstance(raw, dict) or not isinstance(raw.get("requirements"), list):
+            return None
+        form = {k: raw[k] for k in ("nTemplates", "nRetries", "temperature", "tokens", "history", "language",
+                                    "judge_model") if k in raw}
+        form["useLLMEval"] = bool(raw.get("useLLMEval", False))
+        requirements = []
+        for req in raw["requirements"]:
+            communities = req.get("communities") or {}
+            if isinstance(communities, dict):
+                communities = [{"language": lang, "entries": list(entries)} for lang, entries in communities.items()]
+            requirements.append({**{k: v for k, v in req.items() if k != "languages"}, "communities": communities})
+        form["requirements"] = requirements
+        return ConfigFormSchema(**form).model_dump(mode="json", exclude={"judge_api_key"})
 
     def form_schema_to_internal(self, config_form_data: ConfigFormSchema) -> dict:
         # mode="json": plain values for langbite (enum members would label results "LanguageEnum.en_us")

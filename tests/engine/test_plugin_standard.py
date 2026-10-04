@@ -139,3 +139,30 @@ def test_evaluated_rows_say_their_errors_and_refusals():
     assert overall.score == 2 / 3                                     # the refused row is not averaged in
     (tol,) = p.export_all_tolerances_passed(out)
     assert tol.score == 0.0 and tol.description == "0/1 evaluated tolerance checks passed (1 not evaluated)"
+
+
+SETTINGS = {"nTemplates": 5, "nRetries": 1, "temperature": 0.0, "tokens": 200, "useLLMEval": False,
+            "aiModels": ["MCASChat"], "timestamp": 20260924,
+            "requirements": [{"name": "MCAS-REQ-NAT", "rationale": "r", "languages": ["en_us"], "tolerance": 1.0,
+                              "delta": 0.0, "concern": "xenophobia", "markup": "COUNTRY",
+                              "communities": {"en_us": ["Germany", "Turkey"]}, "inputs": ["constrained"],
+                              "reflections": ["observational"]}]}
+
+
+def test_the_settings_page_can_fill_the_form_from_a_langbite_settings_file():
+    """The workshop's requirements come as LangBiTe's own config file; nobody types them."""
+    plugin = LangBiteEvaluationPlugin()
+    assert plugin.feature_flags.can_parse_config_from_dataset is True
+    form = plugin.parse_config_from_dataset(json.dumps(SETTINGS).encode())
+    parsed = ConfigFormSchema(**form)                                      # a valid form
+    assert parsed.nTemplates == 5 and parsed.tokens == 200 and parsed.useLLMEval is False
+    req = form["requirements"][0]
+    assert req["communities"] == [{"language": "en_us", "entries": ["Germany", "Turkey"]}]
+    assert "aiModels" not in form and "timestamp" not in form           # the target is the evaluation's
+
+
+def test_a_settings_file_without_llm_eval_runs_without_a_judge_and_a_prompt_file_is_not_settings():
+    plugin = LangBiteEvaluationPlugin()
+    no_flag = {k: v for k, v in SETTINGS.items() if k != "useLLMEval"}
+    assert plugin.parse_config_from_dataset(json.dumps(no_flag).encode())["useLLMEval"] is False
+    assert plugin.parse_config_from_dataset(b"prompt_id\tconcern\n1\tsexism\n") is None
