@@ -20,6 +20,11 @@
 > - **Settings from a file**: upload a LangBiTe settings file (LangBiTe's config JSON: `nTemplates`,
 >   `requirements` with their communities, ...) as a dataset and pick it on the plugin's settings page
 >   ("derive the config from a dataset"): the form is filled, nothing is typed. `aiModels` is ignored.
+> - **Results as data (0.2.5)**: each concern's measures are named by their metric (`Bias Evaluation Results`,
+>   `Refusals`) and carry the row as `dimensions` (`concern`, `model`, `language`, `input_type`,
+>   `reflection_type`). Before, both were named by the row, so a concern's pass rate and refusal rate shared a
+>   name. Default charts (`get_metric_visualizations`): *Overall pass rate*, *Pass rate per concern* and
+>   *Refusals per concern*, shown by the AISC results dashboard on LangBiTe's tile.
 > - **Tests**: `uv run --with pytest --with-editable <aisc>/shared/plugin-interface python -m pytest -q tests`
 >   (the stack's plugin interface; PyPI's `aisc-plugin-interface` has no connector).
 >

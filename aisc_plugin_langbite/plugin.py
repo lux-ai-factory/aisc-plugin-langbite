@@ -7,6 +7,8 @@ from pandas import DataFrame
 
 from aisc_plugin_interface import (
     BaseEvaluationPlugin,
+    ChartType,
+    MetricVisualization,
     PluginFeatureFlags,
     InputType,
     TaskProgress,
@@ -162,9 +164,12 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
         return [Measure(name="LangBiTe Run Success", score=score, description=description)]
 
     @staticmethod
-    def _row_name(row: dict) -> str:
-        return (f"{row.get('Concern', '')} | {row.get('Model', '')} | {row.get('Language', '')} | "
-                f"{row.get('Input Type', '')} | {row.get('Reflection Type', '')}")
+    def _row_dimensions(row: dict) -> dict[str, str]:
+        """A global-evaluation row as the dimensions of its measures: what the results dashboard groups by.
+        (Before 0.2.5 the row was the measure's name, shared by its pass rate and its refusal rate.)"""
+        return {"concern": str(row.get("Concern", "")), "model": str(row.get("Model", "")),
+                "language": str(row.get("Language", "")), "input_type": str(row.get("Input Type", "")),
+                "reflection_type": str(row.get("Reflection Type", ""))}
 
     @staticmethod
     def _evaluated(rows: list[dict]) -> list[dict]:
@@ -184,8 +189,8 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
                 f"Failed: {row.get('Failed Nr', 0)}/{total} | "
                 f"Errors: {row.get('Error Nr', 0)} | Refused: {row.get('Refused Nr', 0)}"
             )
-            measures.append(Measure(name=self._row_name(row), score=float(row.get("Passed Pct", 0.0)),
-                                    description=description))
+            measures.append(Measure(name="Bias Evaluation Results", score=float(row.get("Passed Pct", 0.0)),
+                                    description=description, dimensions=self._row_dimensions(row)))
         return measures
 
     @metric("Refusals")
@@ -196,8 +201,9 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
             refused = row.get("Refused Nr", 0) or 0
             answered = (row.get("Passed Nr", 0) or 0) + (row.get("Failed Nr", 0) or 0) + refused
             if answered:
-                measures.append(Measure(name=self._row_name(row), score=refused / answered,
-                                        description=f"refused {refused}/{answered}"))
+                measures.append(Measure(name="Refusals", score=refused / answered,
+                                        description=f"refused {refused}/{answered}",
+                                        dimensions=self._row_dimensions(row)))
         return measures
 
     @metric("Overall Pass Rate")
@@ -211,6 +217,21 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
             return []
         avg = sum(float(r.get("Passed Pct", 0.0)) for r in evaluated) / len(evaluated)
         return [Measure(name="Overall Pass Rate", score=avg)]
+
+    def get_metric_visualizations(self, config_data: dict) -> list[MetricVisualization]:
+        """The default charts: the AISC results dashboard shows them on LangBiTe's tile, the engine on its
+        results page. Per concern: the measures' `concern` dimension (_row_dimensions)."""
+        return [
+            MetricVisualization(chart_type=ChartType.TABLE, metrics=["Overall Pass Rate", "All Tolerances Passed"],
+                                title="Overall pass rate",
+                                description="Share of judged answers that passed, over every concern."),
+            MetricVisualization(chart_type=ChartType.BARS, metrics=["Bias Evaluation Results"],
+                                title="Pass rate per concern", group_by_dimensions=["concern"],
+                                description="Share of judged answers that passed, per concern (refusals not judged)."),
+            MetricVisualization(chart_type=ChartType.BARS, metrics=["Refusals"],
+                                title="Refusals per concern", group_by_dimensions=["concern"],
+                                description="Share of probes the target declined to answer, per concern."),
+        ]
 
     @metric("All Tolerances Passed")
     def export_all_tolerances_passed(self, evaluation_output: dict) -> list[Measure]:
