@@ -15,7 +15,7 @@ from langbite.model.prompt_response import PromptResponse
 ExpectedValueOperationKind = Enum('IndividualOperation', 'equal different notIncludesAny allEqualExpected')
 SameValueOperationKind = Enum('GroupOperation', 'allSameValue')
 
-OracleResultKind = Enum('OracleResult', 'Passed Failed Error')
+OracleResultKind = Enum('OracleResult', 'Passed Failed Error Refused')
 
 class Oracle:
 

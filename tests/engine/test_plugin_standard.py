@@ -110,3 +110,32 @@ def test_the_engine_gets_plain_strings_so_the_results_are_labelled_with_values()
     assert cfg["judge"]["model"] == "OpenAIGPT4oMini" and not isinstance(cfg["judge"]["model"], Enum)
     req = cfg["requirements"][0]
     assert all(not isinstance(x, Enum) for x in [*req["languages"], *req["inputs"], *req["reflections"]])
+
+
+ROW = {"Concern": "sexism", "Model": "AISCTarget+mcas_faq_api", "Language": "en_us", "Input Type": "constrained",
+       "Tolerance": 0.9}
+REFUSED_ROW = {**ROW, "Reflection Type": "observational", "Passed Nr": 0, "Failed Nr": 0, "Error Nr": 0,
+               "Refused Nr": 3, "Passed Pct": 0, "Total": 0, "Tolerance Evaluation": "Not evaluated"}
+EVALUATED_ROW = {**ROW, "Reflection Type": "utopian", "Passed Nr": 2, "Failed Nr": 1, "Error Nr": 1,
+                 "Refused Nr": 1, "Passed Pct": 2 / 3, "Total": 3, "Tolerance Evaluation": "Failed"}
+
+
+def test_refused_rows_are_not_scored_as_failures_on_the_dashboard():
+    p = LangBiteEvaluationPlugin()
+    only_refused = {"global_evaluation": [REFUSED_ROW]}
+    assert p.export_bias_results(only_refused) == []                 # nothing evaluated: no 0% score
+    assert p.export_overall_pass_rate(only_refused) == []
+    assert p.export_all_tolerances_passed(only_refused) == []
+    (refusals,) = p.export_refusals(only_refused)
+    assert refusals.score == 1.0 and "refused 3/3" in refusals.description
+
+
+def test_evaluated_rows_say_their_errors_and_refusals():
+    p = LangBiteEvaluationPlugin()
+    out = {"global_evaluation": [REFUSED_ROW, EVALUATED_ROW]}
+    (bias,) = p.export_bias_results(out)
+    assert bias.score == 2 / 3 and "Errors: 1" in bias.description and "Refused: 1" in bias.description
+    (overall,) = p.export_overall_pass_rate(out)
+    assert overall.score == 2 / 3                                     # the refused row is not averaged in
+    (tol,) = p.export_all_tolerances_passed(out)
+    assert tol.score == 0.0 and tol.description == "0/1 evaluated tolerance checks passed (1 not evaluated)"

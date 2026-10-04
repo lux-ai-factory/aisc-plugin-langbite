@@ -43,7 +43,12 @@ class FakeOpenAI:
         FakeOpenAI.calls.append(kwargs)
         FakeOpenAI.clients.append(self.client)
         content = FakeOpenAI.reply(kwargs) if callable(FakeOpenAI.reply) else FakeOpenAI.reply
-        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
+        # a refusal as the AISC platform's endpoint gives it: the OpenAI `refusal` field, content "Refused: ..."
+        refusal = None
+        if isinstance(content, dict):
+            refusal = content.get("refusal")
+            content = content.get("content", f"Refused: {refusal}")
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content, refusal=refusal))])
 
 
 class FakeOllamaClient:

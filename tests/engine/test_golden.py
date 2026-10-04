@@ -16,4 +16,7 @@ def test_t14_no_history_run_matches_golden(fake_openai):
     for name, df in report.items():
         expected = pd.read_csv(GOLDEN / f"{name}.csv")
         actual = pd.read_csv(pd.io.common.StringIO(df.to_csv(index=False)))
+        if "Refused Nr" in actual and "Refused Nr" not in expected:
+            # the column refusals added after the golden run (8e8afde): no refusals here, so all zero
+            assert (actual.pop("Refused Nr") == 0).all(), name
         assert_frame_equal(actual, expected, check_like=False), name

@@ -60,9 +60,26 @@ class AISCTargetServiceBuilder:
         return AISCTargetService(aisc_target_api_key, aisc_target_model, aisc_target_base_url)
 
 
+class Refusal(str):
+    """The target declined to answer. A str, so everything that reads a response reads its text
+    ("Refused: <reason>"); evaluation counts it as its own outcome (Prompt.evaluate)."""
+
+
 class AISCTargetService(OpenAIChatService):
-    """An OpenAI-compatible endpoint that the platform translates to whatever the target is."""
+    """An OpenAI-compatible endpoint that the platform translates to whatever the target is. The
+    platform marks a refusal the OpenAI way (message.refusal)."""
 
     def __init__(self, api_key, model, base_url):
         super().__init__(api_key, model, base_url)
         self.provider = 'AISC target'
+
+    def execute_prompt(self, prompt, history=None):
+        messages = [dict(message) for message in history or []]
+        messages.append({"role": "user", "content": prompt + self.promptSuffix})
+        arguments = {"model": self.model, "messages": messages}
+        if self.temperature: arguments["temperature"] = self.temperature
+        if self.tokens: arguments["max_tokens"] = self.tokens
+        message = self.api_client.chat.completions.create(**arguments).choices[0].message
+        if getattr(message, 'refusal', None):
+            return Refusal(message.content or f'Refused: {message.refusal}')
+        return message.content

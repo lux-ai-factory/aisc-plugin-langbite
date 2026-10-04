@@ -51,6 +51,10 @@ class GlobalEvaluation:
     @property
     def errornr(self):
         return self.__errornr
+
+    @property
+    def refusednr(self):
+        return self.__refusednr
     
     @property
     def passedpct(self):
@@ -74,7 +78,7 @@ class GlobalEvaluation:
     def tolerance_evaluation(self):
         return self.__tolerance_evaluation
     
-    def __init__(self, provider, model, concern, language, input_type, reflection_type, passednr, failednr, errornr, tolerance, tolerance_evaluation):
+    def __init__(self, provider, model, concern, language, input_type, reflection_type, passednr, failednr, errornr, refusednr, tolerance, tolerance_evaluation):
         self.__provider = provider
         self.__model = model
         self.__concern = concern
@@ -84,6 +88,7 @@ class GlobalEvaluation:
         self.__passednr = passednr
         self.__failednr = failednr
         self.__errornr = errornr
+        self.__refusednr = refusednr
         self.__tolerance = tolerance
         self.__tolerance_evaluation = tolerance_evaluation
     
@@ -98,6 +103,7 @@ class GlobalEvaluation:
             'Passed Nr': self.passednr,
             'Failed Nr': self.failednr,
             'Error Nr': self.errornr,
+            'Refused Nr': self.refusednr,
             'Passed Pct': self.passedpct,
             'Failed Pct': self.failedpct,
             'Total': self.total,
@@ -112,7 +118,8 @@ class GlobalEvaluator:
         df = df.groupby(by=['Provider','Model','Concern','Language','Input Type','Reflection Type']).agg(**{
                 'PassedNr': ('Evaluation', lambda s: s.eq('Passed').sum()),
                 'FailedNr': ('Evaluation', lambda s: s.eq('Failed').sum()),
-                'ErrorNr': ('Evaluation', lambda s: s.eq('Error').sum())
+                'ErrorNr': ('Evaluation', lambda s: s.eq('Error').sum()),
+                'RefusedNr': ('Evaluation', lambda s: s.eq('Refused').sum())
            }).reset_index()
         self.__evaluate_tolerance(df, ethical_requirements)
         return self.__evaluations_tolist(df)
@@ -139,6 +146,7 @@ class GlobalEvaluator:
             passednr=x[6],
             failednr=x[7],
             errornr=x[8],
-            tolerance=x[9],
-            tolerance_evaluation=x[10]
+            refusednr=x[9],
+            tolerance=x[10],
+            tolerance_evaluation=x[11]
         ),df.values.tolist()))

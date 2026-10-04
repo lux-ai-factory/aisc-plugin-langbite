@@ -131,25 +131,43 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
         description = evaluation_output.get("error") or "LangBiTe execution finished"
         return [Measure(name="LangBiTe Run Success", score=score, description=description)]
 
+    @staticmethod
+    def _row_name(row: dict) -> str:
+        return (f"{row.get('Concern', '')} | {row.get('Model', '')} | {row.get('Language', '')} | "
+                f"{row.get('Input Type', '')} | {row.get('Reflection Type', '')}")
+
+    @staticmethod
+    def _evaluated(rows: list[dict]) -> list[dict]:
+        """Rows with answers to judge: a row where the target refused everything has none, and scoring it
+        0% would read as a failure."""
+        return [r for r in rows if (r.get("Total") or 0) > 0]
+
     @metric("Bias Evaluation Results")
     def export_bias_results(self, evaluation_output: dict) -> list[Measure]:
         measures = []
-        for row in evaluation_output.get("global_evaluation", []):
-            name = (
-                f"{row.get('Concern', '')} | {row.get('Model', '')} | "
-                f"{row.get('Language', '')} | {row.get('Input Type', '')} | "
-                f"{row.get('Reflection Type', '')}"
-            )
+        for row in self._evaluated(evaluation_output.get("global_evaluation", [])):
             total = row.get("Total", 0)
             description = (
                 f"Tolerance Evaluation: {row.get('Tolerance Evaluation', 'Unknown')} | "
                 f"Tolerance: {row.get('Tolerance', '')} | "
                 f"Passed: {row.get('Passed Nr', 0)}/{total} | "
-                f"Failed: {row.get('Failed Nr', 0)}/{total}"
+                f"Failed: {row.get('Failed Nr', 0)}/{total} | "
+                f"Errors: {row.get('Error Nr', 0)} | Refused: {row.get('Refused Nr', 0)}"
             )
-            measures.append(
-                Measure(name=name, score=float(row.get("Passed Pct", 0.0)), description=description)
-            )
+            measures.append(Measure(name=self._row_name(row), score=float(row.get("Passed Pct", 0.0)),
+                                    description=description))
+        return measures
+
+    @metric("Refusals")
+    def export_refusals(self, evaluation_output: dict) -> list[Measure]:
+        """How often the target declined: its own outcome, neither passed nor failed."""
+        measures = []
+        for row in evaluation_output.get("global_evaluation", []):
+            refused = row.get("Refused Nr", 0) or 0
+            answered = (row.get("Passed Nr", 0) or 0) + (row.get("Failed Nr", 0) or 0) + refused
+            if answered:
+                measures.append(Measure(name=self._row_name(row), score=refused / answered,
+                                        description=f"refused {refused}/{answered}"))
         return measures
 
     @metric("Overall Pass Rate")
@@ -158,18 +176,26 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
         if not rows:
             error = evaluation_output.get("error", "")
             return [Measure(name="Overall Pass Rate", score=0.0, description=error or "No evaluations produced")]
-        avg = sum(float(r.get("Passed Pct", 0.0)) for r in rows) / len(rows)
+        evaluated = self._evaluated(rows)
+        if not evaluated:
+            return []
+        avg = sum(float(r.get("Passed Pct", 0.0)) for r in evaluated) / len(evaluated)
         return [Measure(name="Overall Pass Rate", score=avg)]
 
     @metric("All Tolerances Passed")
     def export_all_tolerances_passed(self, evaluation_output: dict) -> list[Measure]:
         rows = evaluation_output.get("global_evaluation", [])
-        n_passed = sum(1 for r in rows if r.get("Tolerance Evaluation") == "Passed")
-        all_passed = bool(rows) and n_passed == len(rows)
+        evaluated = self._evaluated(rows)
+        if rows and not evaluated:
+            return []
+        n_passed = sum(1 for r in evaluated if r.get("Tolerance Evaluation") == "Passed")
+        all_passed = bool(evaluated) and n_passed == len(evaluated)
+        skipped = len(rows) - len(evaluated)
         return [
             Measure(
                 name="All Tolerances Passed",
                 score=1.0 if all_passed else 0.0,
-                description=f"{n_passed}/{len(rows)} tolerance checks passed",
+                description=f"{n_passed}/{len(evaluated)} evaluated tolerance checks passed"
+                            + (f" ({skipped} not evaluated)" if skipped else ""),
             )
         ]

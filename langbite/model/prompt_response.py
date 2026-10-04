@@ -13,7 +13,10 @@ class PromptResponse:
     
     @response.setter
     def response(self, value: str):
-        self.__response = clean_string(value)
+        from langbite.llm_services.llm_openai_factory import Refusal
+        cleaned = clean_string(value)
+        # keep the mark: a refusal is evaluated as its own outcome (Prompt.evaluate)
+        self.__response = Refusal(cleaned) if isinstance(value, Refusal) else cleaned
     
     @property
     def execution_time(self):
