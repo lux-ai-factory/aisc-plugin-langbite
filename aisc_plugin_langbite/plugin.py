@@ -17,7 +17,7 @@ from aisc_plugin_interface.system_under_test import system_under_test
 
 from .artifact_csv import global_eval_to_csv_bytes
 from .custom_dataset_input_provider import CustomDatasetInputProvider
-from .models import ConfigFormSchema, LanguageEnum
+from .models import ConfigFormSchema
 from .ui_schema import ui_schema
 
 DATASET_INPUT = "dataset"
@@ -47,7 +47,8 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
     form_ui_schema = ui_schema
 
     def form_schema_to_internal(self, config_form_data: ConfigFormSchema) -> dict:
-        config_data = config_form_data.model_dump()
+        # mode="json": plain values for langbite (enum members would label results "LanguageEnum.en_us")
+        config_data = config_form_data.model_dump(mode="json")
         config_data["aiModels"] = ["AISCTarget"]
         config_data["judge"] = {"model": config_data.pop("judge_model"), "api_key": config_data.pop("judge_api_key")}
         history = config_data.pop("history")
@@ -57,7 +58,7 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
             languages = []
             for community in requirement["communities"]:
                 communities[community["language"]] = community["entries"]
-                languages.append(LanguageEnum(community["language"]))
+                languages.append(community["language"])
             requirement["languages"] = languages
             requirement["communities"] = communities
         config_data["timestamp"] = int(time.time())

@@ -99,3 +99,14 @@ def test_a_run_reaches_the_target_through_the_platform_and_judges_on_its_own_key
     judged = [k for c, k in pairs if c["messages"][-1]["content"].startswith("You are evaluating")]
     assert tested and all(k == {"api_key": "aisc-run-key", "base_url": BASE} for k in tested)
     assert judged and all(k["api_key"] == "judge-key" for k in judged)
+
+
+def test_the_engine_gets_plain_strings_so_the_results_are_labelled_with_values():
+    """With enum members the labels read 'AISCTarget+HistoryChoice.mcas_faq_api' and 'LanguageEnum.en_us'."""
+    from enum import Enum
+    cfg = LangBiteEvaluationPlugin().form_schema_to_internal(ConfigFormSchema(**form(history="mcas_faq_api")))
+    assert cfg["history"] == "mcas_faq_api" and not isinstance(cfg["history"], Enum)
+    assert cfg["language"] == "en_us" and not isinstance(cfg["language"], Enum)
+    assert cfg["judge"]["model"] == "OpenAIGPT4oMini" and not isinstance(cfg["judge"]["model"], Enum)
+    req = cfg["requirements"][0]
+    assert all(not isinstance(x, Enum) for x in [*req["languages"], *req["inputs"], *req["reflections"]])
