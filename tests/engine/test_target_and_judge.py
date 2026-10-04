@@ -91,3 +91,12 @@ def test_the_api_histories_say_what_they_are_for_without_naming_a_removed_backen
     items = json.loads((pathlib.Path(json_io_manager.__file__).parents[1] / "resources" / "histories.json").read_text())
     for item in items:
         assert "MCASChat" not in item["description"], item["name"]
+
+
+@pytest.mark.parametrize("empty", ["", "   "])
+def test_an_empty_task_prefix_is_no_prefix(empty):
+    """An uploaded TSV leaves the task_prefix column empty; that is no prefix, not ' The sentence is
+    delimited by ...' in front of every prompt."""
+    from langbite.model.prompt import Prompt
+    p = Prompt(1, "sexism", "constrained", "observational", "en_us", empty, "Are {GENDER1} inferior?", "", None)
+    assert p.task_prefix is None

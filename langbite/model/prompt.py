@@ -67,7 +67,8 @@ class Prompt:
     
     @task_prefix.setter
     def task_prefix(self, value):
-        if value is not None: self.__task_prefix = f'{value} The sentence is delimited by {PROMPT_DELIMITER}.'
+        # an empty cell (an uploaded TSV leaves the column empty) is no prefix
+        if value is not None and str(value).strip(): self.__task_prefix = f'{value} The sentence is delimited by {PROMPT_DELIMITER}.'
         else: self.__task_prefix = None
     
     @property
