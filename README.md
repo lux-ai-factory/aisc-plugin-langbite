@@ -6,6 +6,20 @@
 > shared data model) so it can be installed and run as a plugin in the generated sandbox environment. The plugin-specific
 > code and configuration live alongside the upstream sources.
 >
+> **In the AISC stack** (AISC's plugin standard, aisc-plugin-interface's PLUGIN_DEVELOPER_GUIDE.md section 13):
+>
+> - **What is tested is the evaluation's target**: the system or a component whose endpoint is set under
+>   Manage, Targets and endpoints. The platform points LangBiTe's `AISCTarget` model at it for the run
+>   (`AISC_TARGET_BASE_URL`, `AISC_TARGET_API_KEY`, `AISC_TARGET_MODEL`); the form has no model or key
+>   for it. A target without an endpoint is refused before the run starts.
+> - **The judge (Use LLMEval) is a tool setting**: its own model (an OpenAI model of `factories.json`) and
+>   its own key in the form, on its own client. It is off by default; with it on and no key the run is
+>   refused at the start. Its verdict is read as True or False, never evaluated.
+> - **Conversation history**: one of `langbite/resources/histories.json` sent before every test prompt,
+>   or none. For a target with its own system prompt (MCAS-lite `/chat`) choose a `*_api` history.
+> - **Tests**: `uv run --with pytest --with-editable <aisc>/shared/plugin-interface python -m pytest -q tests`
+>   (the stack's plugin interface; PyPI's `aisc-plugin-interface` has no connector).
+>
 > **Everything below the line is the original, unmodified LangBiTe README.**
 
 ---

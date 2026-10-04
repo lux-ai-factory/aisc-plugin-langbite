@@ -1,6 +1,6 @@
 ui_schema = {
     "ui:spacing": 3,
-    "model_credential": {
+    "judge_api_key": {
         "ui:widget": "password"
     },
     "requirements": {

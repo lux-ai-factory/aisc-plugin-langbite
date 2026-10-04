@@ -3,32 +3,30 @@ from enum import Enum
 from pydantic import BaseModel, Field, model_validator
 
 
-def _registered_model_keys() -> list[str]:
-    """Model keys registered in langbite/resources/factories.json, so the
-    'Select AI Model' dropdown offers every supported model (OpenAI, Ollama,
-    HuggingFace, Replicate, GPT4ALL) instead of only GPT4ALL. Falls back to
-    GPT4ALL if the registry can't be read."""
+def _factories() -> list[dict]:
     try:
         from langbite.io_managers import json_io_manager
-        keys = [f["key"] for f in json_io_manager.load_factories() if f.get("key")]
-        return keys or ["GPT4ALL"]
+        return json_io_manager.load_factories()
     except Exception:
-        return ["GPT4ALL"]
+        return []
 
 
-# Member NAME can't contain '.', so sanitise the name but keep the real key as
-# the VALUE (what is shown in the dropdown and passed to langbite's llm_factory).
-AIModelProvider = Enum(
-    "AIModelProvider",
-    {key.replace(".", "_"): key for key in _registered_model_keys()},
-    type=str,
-)
+def _history_names() -> list[str]:
+    try:
+        from langbite.io_managers import json_io_manager
+        return list(json_io_manager.load_histories())
+    except Exception:
+        return []
 
-_DEFAULT_MODEL = (
-    AIModelProvider.GPT4ALL
-    if "GPT4ALL" in AIModelProvider.__members__
-    else next(iter(AIModelProvider))
-)
+
+# The judge (LLMEval) is an OpenAI chat model of langbite's factories.json. A member NAME can't hold
+# '.', so the name is sanitised and the VALUE keeps the real key.
+_JUDGE_KEYS = [f["key"] for f in _factories() if f.get("key") and f.get("provider", "").upper() == "OPENAI"]
+JudgeModel = Enum("JudgeModel", {k.replace(".", "_"): k for k in (_JUDGE_KEYS or ["OpenAIGPT4oMini"])}, type=str)
+_DEFAULT_JUDGE = JudgeModel("OpenAIGPT4oMini") if "OpenAIGPT4oMini" in _JUDGE_KEYS else next(iter(JudgeModel))
+
+# A fixed conversation sent before every test prompt (langbite/resources/histories.json), or none.
+HistoryChoice = Enum("HistoryChoice", {n: n for n in ["none", *_history_names()]}, type=str)
 
 
 class LanguageEnum(str, Enum):
@@ -87,20 +85,24 @@ class RequirementsSchema(BaseModel):
 
 class ConfigFormSchema(BaseModel):
     nTemplates: int = Field(default=60, title="Number of templates")
-    nRetries: int = Field(default=1, title="Number of templates")
+    nRetries: int = Field(default=1, title="Number of retries")
     temperature: float = Field(default=1.0, ge=0, le=2, title="Temperature")
     tokens: int = Field(default=60, title="Number of tokens")
-    useLLMEval: bool = Field(default=True, title="Use LLMEval")
-    aiModels: AIModelProvider = Field(
-        default=_DEFAULT_MODEL,
-        title="Select AI Model",
-        description="Choose the model for this evaluation (from langbite's factories.json registry)"
+    history: HistoryChoice = Field(
+        default=HistoryChoice("none"),
+        title="Conversation history",
+        description="A fixed conversation sent before every test prompt. For a target that has its own "
+                    "system prompt (such as MCAS-lite /chat) choose a *_api history.",
     )
-    model_credential: str = Field(
-        default="",
-        title="API Key",
-        description="API key for the selected model's provider (OpenAI / HuggingFace / Replicate). "
-                    "For Ollama, put the base URL here. Leave blank for GPT4ALL (runs locally).",
+    useLLMEval: bool = Field(
+        default=False, title="Use LLMEval",
+        description="Ask a judge model to re-check every answer that fails a check. Needs the judge's key.")
+    judge_model: JudgeModel = Field(
+        default=_DEFAULT_JUDGE, title="Judge model (LLMEval)",
+        description="The model that judges the answers: a tool setting, never the system under test.")
+    judge_api_key: str = Field(
+        default="", title="Judge API key (LLMEval)",
+        description="The OpenAI API key for the judge model. Used only with LLMEval.",
         json_schema_extra={"format": "password"},
     )
     requirements: list[RequirementsSchema] = Field(default_factory=list, title="Requirements")
