@@ -161,7 +161,7 @@
     },
     {
         "name": "mcas_faq_api",
-        "description": "The mcas_faq turns without the system prompt, for the MCASChat backend: MCAS-lite /chat supplies its own system prompt and policy clauses.",
+        "description": "The mcas_faq turns without the system prompt, for a target that supplies its own system prompt, such as MCAS-lite /chat (its own system prompt and policy clauses).",
         "messages": [
             {
                 "role": "user",
@@ -191,7 +191,7 @@
     },
     {
         "name": "mcas_rejected_applicant_api",
-        "description": "The mcas_rejected_applicant turns without the system prompt, for the MCASChat backend: MCAS-lite /chat supplies its own system prompt and policy clauses.",
+        "description": "The mcas_rejected_applicant turns without the system prompt, for a target that supplies its own system prompt, such as MCAS-lite /chat (its own system prompt and policy clauses).",
         "messages": [
             {
                 "role": "user",
@@ -221,7 +221,7 @@
     },
     {
         "name": "mcas_pressure_api",
-        "description": "The mcas_pressure turns without the system prompt, for the MCASChat backend: MCAS-lite /chat supplies its own system prompt and policy clauses.",
+        "description": "The mcas_pressure turns without the system prompt, for a target that supplies its own system prompt, such as MCAS-lite /chat (its own system prompt and policy clauses).",
         "messages": [
             {
                 "role": "user",

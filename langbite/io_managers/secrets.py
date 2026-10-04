@@ -12,6 +12,9 @@ def load_api_keys():
         'huggingface_api_key': os.environ.get("API_KEY_HUGGINGFACE", ""),
         'replicate_api_key': os.environ.get("API_KEY_REPLICATE", ""),
         'ollama_url': os.environ.get("OLLAMA_URL", ""),
-        'mcas_url': os.environ.get("MCAS_URL", "http://localhost:8500")
+        # the evaluation's target, set by the AISC platform for the length of a run
+        'aisc_target_base_url': os.environ.get("AISC_TARGET_BASE_URL", ""),
+        'aisc_target_api_key': os.environ.get("AISC_TARGET_API_KEY", ""),
+        'aisc_target_model': os.environ.get("AISC_TARGET_MODEL", ""),
     }
     return config

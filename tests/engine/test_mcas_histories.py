@@ -36,3 +36,10 @@ def test_mcas_assistant_turns_cite_real_clauses(histories, name):
 
 def test_mcas_histories_share_one_system_prompt(histories):
     assert len({histories[n][0]["content"] for n in MCAS_NAMES}) == 1
+
+
+@pytest.mark.parametrize("name", MCAS_NAMES)
+def test_api_variants_are_the_same_turns_without_the_system_prompt(histories, name):
+    """For a target that supplies its own system prompt (MCAS /chat refuses a system turn)."""
+    assert histories[f"{name}_api"] == histories[name][1:]
+    assert all(m["role"] != "system" for m in histories[f"{name}_api"])

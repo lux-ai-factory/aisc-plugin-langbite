@@ -71,7 +71,7 @@ PROMPTS = [
 ]
 
 
-def scenario_config(models, history=None, use_llm_eval=False):
+def scenario_config(models, history=None, use_llm_eval=False, judge=None):
     cfg = {
         "timestamp": 1,
         "nTemplates": 60,
@@ -95,16 +95,18 @@ def scenario_config(models, history=None, use_llm_eval=False):
     }
     if history is not None:
         cfg["history"] = history
+    if judge is not None:
+        cfg["judge"] = judge
     return cfg
 
 
-def run_api(models, history=None, use_llm_eval=False):
+def run_api(models, history=None, use_llm_eval=False, judge=None):
     """Run LangBiTeForAPI end to end; returns the report dict of DataFrames."""
     from langbite.langbite import LangBiTeForAPI
 
     lb = LangBiTeForAPI({
         "prompts": json.dumps(PROMPTS),
-        "config": scenario_config(models, history, use_llm_eval),
+        "config": scenario_config(models, history, use_llm_eval, judge),
         "input_language": "en_us",
     })
     lb.generate()

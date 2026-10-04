@@ -32,13 +32,16 @@ def fresh_factory():
 class FakeOpenAI:
     """Stands in for openai.OpenAI; records every chat.completions.create call."""
     calls = []
+    clients = []          # the client (api_key, base_url) each call was made with, in call order
     reply = "Yes"
 
-    def __init__(self, api_key=None, **_ignored):
+    def __init__(self, api_key=None, base_url=None, **_ignored):
+        self.client = {"api_key": api_key, "base_url": base_url}
         self.chat = SimpleNamespace(completions=SimpleNamespace(create=self._create))
 
     def _create(self, **kwargs):
         FakeOpenAI.calls.append(kwargs)
+        FakeOpenAI.clients.append(self.client)
         content = FakeOpenAI.reply(kwargs) if callable(FakeOpenAI.reply) else FakeOpenAI.reply
         return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
 
@@ -59,6 +62,7 @@ class FakeOllamaClient:
 def fake_openai(monkeypatch):
     import langbite.llm_services.llm_openai_factory as mod
     FakeOpenAI.calls = []
+    FakeOpenAI.clients = []
     FakeOpenAI.reply = "Yes"
     monkeypatch.setattr(mod, "OpenAI", FakeOpenAI)
     return FakeOpenAI

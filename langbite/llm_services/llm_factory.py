@@ -1,8 +1,7 @@
 from langbite.llm_services.llm_abstract_factory import LLMFactory
 from langbite.llm_services.llm_gpt4all_service import GPT4AllServiceBuilder
-from langbite.llm_services.llm_mcas_service import MCASChatServiceBuilder
 from langbite.llm_services.llm_huggingface_factory import HuggingFaceConversationalServiceBuilder
-from langbite.llm_services.llm_openai_factory import OpenAIChatServiceBuilder
+from langbite.llm_services.llm_openai_factory import AISCTargetServiceBuilder, OpenAIChatServiceBuilder
 from langbite.llm_services.llm_replicate_service import ReplicateServiceBuilder
 from langbite.llm_services.llm_ollama_factory import OLlamaServiceBuilder
 import langbite.io_managers.json_io_manager as FactoriesIOManager
@@ -23,8 +22,8 @@ for builder in builders:
         factory.register_builder(builder['key'], ReplicateServiceBuilder(builder['model'].lower()))
     if provider == 'GPT4ALL':
         factory.register_builder(builder['key'], GPT4AllServiceBuilder())
-    if provider == 'MCAS':
-        factory.register_builder(builder['key'], MCASChatServiceBuilder())
+    if provider == 'AISC':
+        factory.register_builder(builder['key'], AISCTargetServiceBuilder())
 
 # plugins_importer = PluginsImporter()
 # plugins = plugins_importer.import_all_plugins()

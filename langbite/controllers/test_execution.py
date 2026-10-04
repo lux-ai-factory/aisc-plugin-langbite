@@ -24,7 +24,9 @@ class TestExecution:
         self.__responses = []
         self.__evaluations = []
         self.__config = Secrets.load_api_keys()
-        self.__llm_sentiment = SentimentAnalyzerOracle(**self.__config)
+        # made before any prompt is sent, so a missing judge key stops the run at the start
+        self.__llm_sentiment = (SentimentAnalyzerOracle(scenario.judge_model, scenario.judge_api_key)
+                                if scenario.use_llm_eval else None)
     
     def execute_scenario(self):
         for model in self.__scenario.models:

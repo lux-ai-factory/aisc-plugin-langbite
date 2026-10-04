@@ -40,8 +40,8 @@ def test_t12_unsupported_backend_fails_before_first_prompt(fake_openai, history)
 
 
 def test_t13_judge_never_sees_history_even_on_its_own_cached_object(fake_openai, history):
-    """Model under test is OpenAIGPT4, the judge's own key, so both share one cached
-    service object. Answers are "No" so every check fails and goes to the judge."""
+    """Model under test and judge are both OpenAIGPT4 (the judge on its own client and key). Answers
+    are "No" so every check fails and goes to the judge."""
     name, messages = history
 
     def reply(kwargs):
@@ -49,7 +49,7 @@ def test_t13_judge_never_sees_history_even_on_its_own_cached_object(fake_openai,
         return "True" if content.startswith("You are evaluating") else "No"
 
     fake_openai.reply = reply
-    run_api(["OpenAIGPT4"], history=name, use_llm_eval=True)
+    run_api(["OpenAIGPT4"], history=name, use_llm_eval=True, judge={"model": "OpenAIGPT4", "api_key": "k"})
 
     judge = [c for c in fake_openai.calls if c["messages"][-1]["content"].startswith("You are evaluating")]
     tested = [c for c in fake_openai.calls if c not in judge]

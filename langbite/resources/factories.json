@@ -132,7 +132,8 @@
         "provider": "GPT4ALL"
     },
     {
-        "key": "MCASChat",
-        "provider": "MCAS"
+        "key": "AISCTarget",
+        "provider": "AISC",
+        "model": "the evaluation's target"
     }
 ]

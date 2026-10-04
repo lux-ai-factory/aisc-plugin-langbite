@@ -106,6 +106,10 @@ class TestScenario:
         self.languages = self.__set_languages()
         self.models = cfg['aiModels']
         self.__set_history(cfg.get('history'))
+        # the judge (LLMEval) is a tool model: its own model and key, from the run's settings
+        judge = cfg.get('judge') or {}
+        self.judge_model = judge.get('model') or 'OpenAIGPT4oMini'
+        self.judge_api_key = judge.get('api_key') or ''
 
     def __set_history(self, name):
         self.__history_name = name or None
