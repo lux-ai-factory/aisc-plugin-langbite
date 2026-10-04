@@ -17,14 +17,9 @@ from pathlib import Path
 
 import pandas as pd
 
-# Load the helper module directly by file path so we do NOT trigger
-# `langbite/__init__.py`, which imports the full plugin (and aisc_plugin_interface).
-_HELPER_PATH = (
-    Path(__file__).resolve().parent.parent
-    / "langbite"
-    / "aisc_plugin"
-    / "artifact_csv.py"
-)
+# Load the helper module directly by file path, so the plugin package (and aisc_plugin_interface) is not
+# imported.
+_HELPER_PATH = Path(__file__).resolve().parent.parent / "aisc_plugin_langbite" / "artifact_csv.py"
 _spec = importlib.util.spec_from_file_location("langbite_artifact_csv", _HELPER_PATH)
 _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
