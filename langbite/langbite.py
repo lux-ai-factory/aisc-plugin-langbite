@@ -133,6 +133,17 @@ class AbstractLangBiTe:
         print(f'Time elapsed for executing {self.__num_instances} instances (from {self.__num_prompts} prompt templates): ' + str(time_end - time_ini))
         self.__current_status = 2
 
+    def cases(self):
+        """Each evaluation with the instances and answers it judged, as plain data. The report's
+        evaluations and responses tables have nothing joining them; this does."""
+        if (self.__current_status != 2): raise WrongStateException
+        return [{"provider": e.provider, "model": e.model, "concern": e.concern, "language": e.language,
+                 "input_type": str(e.input_type), "reflection_type": str(e.reflection_type),
+                 "template": e.template, "evaluation": e.evaluation, "operation": e.oracle_evaluation,
+                 "expected_value": [str(v) for v in (e.oracle_prediction or [])],
+                 "responses": [{"prompt": p, "response": r} for p, r in e.responses]}
+                for e in self.__evaluations]
+
     def report(self, path=None):
         if (self.__current_status != 2): raise WrongStateException
         global_evaluator = GlobalEvaluator()

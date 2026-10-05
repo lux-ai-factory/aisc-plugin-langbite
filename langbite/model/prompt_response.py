@@ -11,9 +11,15 @@ class PromptResponse:
     def response(self) -> str:
         return self.__response
     
+    @property
+    def raw_response(self) -> str:
+        """The answer as the target gave it: `response` is cleaned (lowercased, one line) for the oracle."""
+        return self.__raw_response
+
     @response.setter
     def response(self, value: str):
         from langbite.llm_services.llm_openai_factory import Refusal
+        self.__raw_response = str(value)
         cleaned = clean_string(value)
         # keep the mark: a refusal is evaluated as its own outcome (Prompt.evaluate)
         self.__response = Refusal(cleaned) if isinstance(value, Refusal) else cleaned

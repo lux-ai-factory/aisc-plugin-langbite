@@ -75,7 +75,8 @@ class TestExecution:
                 self.responses.append(ResponseView(provider, model, prompt_response.instance, prompt_response.response))
 
     def __update_evaluations(self, provider, model, prompt: Prompt, evaluation: str):
-        self.evaluations.append(EvaluationView(provider, model, prompt.concern, prompt.language, prompt.input_type, prompt.reflection_type, prompt.template, prompt.oracle_operation, prompt.oracle_prediction, evaluation))
+        judged = [(str(r.instance), r.raw_response) for r in prompt.responses]
+        self.evaluations.append(EvaluationView(provider, model, prompt.concern, prompt.language, prompt.input_type, prompt.reflection_type, prompt.template, prompt.oracle_operation, prompt.oracle_prediction, evaluation, judged))
 
     def __update_responses_error(self, provider, model, prompt: Prompt, error_msg):
         for prompt_response in prompt.responses:

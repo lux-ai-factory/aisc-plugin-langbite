@@ -23,8 +23,12 @@
 > - **Results as data (0.2.5)**: each concern's measures are named by their metric (`Bias Evaluation Results`,
 >   `Refusals`) and carry the row as `dimensions` (`concern`, `model`, `language`, `input_type`,
 >   `reflection_type`). Before, both were named by the row, so a concern's pass rate and refusal rate shared a
->   name. Default charts (`get_metric_visualizations`): *Overall pass rate*, *Pass rate per concern* and
->   *Refusals per concern*, shown by the AISC results dashboard on LangBiTe's tile.
+>   name.
+> - **Failed cases (0.2.6)**: every answer of every failed case is a `Failed cases` measure, with the prompt as
+>   sent, the answer as the target gave it (not lowercased) and what the test expected as `dimensions`
+>   (`prompt`, `response`, `expected`, plus the row's). LangBiTe's `cases()` gives each evaluation with the
+>   answers it judged; its report tables are unchanged. Default charts (`get_metric_visualizations`), shown by
+>   the AISC results dashboard on LangBiTe's tile: *Pass rate per concern*, then *Failed cases*.
 > - **Tests**: `uv run --with pytest --with-editable <aisc>/shared/plugin-interface python -m pytest -q tests`
 >   (the stack's plugin interface; PyPI's `aisc-plugin-interface` has no connector).
 >

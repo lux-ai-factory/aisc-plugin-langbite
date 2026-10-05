@@ -88,8 +88,13 @@ class EvaluationView:
     @property
     def evaluation(self):
         return self.__evaluation
+
+    @property
+    def responses(self):
+        # (instance, response) pairs this evaluation judged; not in to_dict, so the report is unchanged
+        return self.__responses
     
-    def __init__(self, provider, model, concern, language, input_type, reflection_type, template, oracle_evaluation, oracle_prediction, evaluation):
+    def __init__(self, provider, model, concern, language, input_type, reflection_type, template, oracle_evaluation, oracle_prediction, evaluation, responses=()):
         self.__provider = provider
         self.__model = model
         self.__concern = concern
@@ -100,6 +105,7 @@ class EvaluationView:
         self.__oracle_evaluation = oracle_evaluation
         self.__oracle_prediction = oracle_prediction
         self.__evaluation = evaluation
+        self.__responses = tuple(responses)
     
     def to_dict(self):
         return {

@@ -31,6 +31,25 @@ def _error_result(message: str) -> dict:
     return {"global_evaluation": [], "status": "error", "error": message}
 
 
+_EXPECTED = {"equal": "every answer", "allEqualExpected": "every answer", "different": "no answer",
+             "notIncludesAny": "no answer contains"}
+
+
+def expected_answer(operation, values) -> str:
+    """What a case's oracle expected, in words: 'every answer: "No" or "I don't think"'."""
+    if operation == "allSameValue":
+        return "the same answer for every community"
+    if not operation:
+        return ""
+    quoted = " or ".join(f'"{v}"' for v in (values or []))
+    return f"{_EXPECTED.get(operation, operation)}: {quoted}"
+
+
+def outcome(global_records: list, cases: list) -> dict:
+    """A successful run's output: the per-concern report and every case with its answers."""
+    return {"global_evaluation": global_records, "cases": cases, "status": "success"}
+
+
 # The model under test is the evaluation's target, reached through its endpoint in Manage: the platform
 # sets AISC_TARGET_* for the run, which langbite's AISCTarget model reads. The judge keeps its own
 # fields in the form (judge_model, judge_api_key), so it is never pointed at the target.
@@ -154,9 +173,29 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
             global_records = list(global_eval) if global_eval else []
 
         self.report_progress(TaskProgress(progress=0.95, extra={"stage": "done"}))
-        return {"global_evaluation": global_records, "status": "success"}
+        return outcome(global_records, langbite.cases())
 
     # ── Metrics (ported from the MLA-BiTe plugin, rebranded LangBiTe) ──────────
+    @metric("Failed cases")
+    def export_failed_cases(self, evaluation_output: dict) -> list[Measure]:
+        """Every answer of every failed case, as the target gave it: what the results dashboard lists under
+        the pass rate. A case is one template; its answers (one per community) are judged together, so each
+        answer of a failed case is a row. Passed, refused and errored cases are left out."""
+        measures = []
+        for case in evaluation_output.get("cases", []):
+            if case.get("evaluation") != "Failed":
+                continue
+            row = {"Concern": case.get("concern"), "Model": case.get("model"), "Language": case.get("language"),
+                   "Input Type": case.get("input_type"), "Reflection Type": case.get("reflection_type")}
+            expected = expected_answer(case.get("operation"), case.get("expected_value"))
+            for answer in case.get("responses", []):
+                measures.append(Measure(name="Failed cases", score=1.0, description=str(case.get("template", "")),
+                                        dimensions={**self._row_dimensions(row),
+                                                    "prompt": str(answer.get("prompt", "")),
+                                                    "response": str(answer.get("response", "")),
+                                                    "expected": expected}))
+        return measures
+
     @metric("LangBiTe Run Success")
     def export_run_success(self, evaluation_output: dict) -> list[Measure]:
         score = 1.0 if evaluation_output.get("status") == "success" else 0.0
@@ -222,15 +261,13 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
         """The default charts: the AISC results dashboard shows them on LangBiTe's tile, the engine on its
         results page. Per concern: the measures' `concern` dimension (_row_dimensions)."""
         return [
-            MetricVisualization(chart_type=ChartType.TABLE, metrics=["Overall Pass Rate", "All Tolerances Passed"],
-                                title="Overall pass rate",
-                                description="Share of judged answers that passed, over every concern."),
             MetricVisualization(chart_type=ChartType.BARS, metrics=["Bias Evaluation Results"],
                                 title="Pass rate per concern", group_by_dimensions=["concern"],
                                 description="Share of judged answers that passed, per concern (refusals not judged)."),
-            MetricVisualization(chart_type=ChartType.BARS, metrics=["Refusals"],
-                                title="Refusals per concern", group_by_dimensions=["concern"],
-                                description="Share of probes the target declined to answer, per concern."),
+            MetricVisualization(chart_type=ChartType.TABLE, metrics=["Failed cases"],
+                                title="Failed cases", group_by_dimensions=["concern", "prompt", "response", "expected"],
+                                description="Every answer of every failed case: the prompt as sent, the target's "
+                                            "answer, and what the test expected."),
         ]
 
     @metric("All Tolerances Passed")
