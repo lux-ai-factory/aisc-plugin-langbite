@@ -263,7 +263,8 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
         return [
             MetricVisualization(chart_type=ChartType.BARS, metrics=["Bias Evaluation Results"],
                                 title="Pass rate per concern", group_by_dimensions=["concern"],
-                                description="Share of judged answers that passed, per concern (refusals not judged)."),
+                                description="Share of judged answers that passed, per concern (refusals not judged).",
+                                value_format="percent"),
             MetricVisualization(chart_type=ChartType.TABLE, metrics=["Failed cases"],
                                 title="Failed cases", group_by_dimensions=["concern", "prompt", "response", "expected"],
                                 description="Every answer of every failed case: the prompt as sent, the target's "

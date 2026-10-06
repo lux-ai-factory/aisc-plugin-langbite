@@ -29,6 +29,8 @@
 >   (`prompt`, `response`, `expected`, plus the row's). LangBiTe's `cases()` gives each evaluation with the
 >   answers it judged; its report tables are unchanged. Default charts (`get_metric_visualizations`), shown by
 >   the AISC results dashboard on LangBiTe's tile: *Pass rate per concern*, then *Failed cases*.
+> - **Pass rate as a percent (0.2.7)**: *Pass rate per concern* declares `value_format="percent"`, so the
+>   dashboard and the report show 100% rather than 1. An interface without the field ignores it.
 > - **Tests**: `uv run --with pytest --with-editable <aisc>/shared/plugin-interface python -m pytest -q tests`
 >   (the stack's plugin interface; PyPI's `aisc-plugin-interface` has no connector).
 >

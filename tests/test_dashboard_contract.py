@@ -130,3 +130,11 @@ def test_the_default_charts_are_the_pass_rate_per_concern_then_the_failed_cases(
         ("Pass rate per concern", ChartType.BARS, ["Bias Evaluation Results"], ["concern"]),
         ("Failed cases", ChartType.TABLE, ["Failed cases"], ["concern", "prompt", "response", "expected"]),
     ]
+
+
+def test_the_pass_rate_reads_as_percent_and_the_failed_cases_as_they_are():
+    """A pass rate is a ratio from 0 to 1: the dashboard showed a concern that passed as "1" (workshop
+    2026-10-06). The chart says its values are percent; the failed cases are a list, not a ratio."""
+    charts = {c.title: c for c in LangBiteEvaluationPlugin().get_metric_visualizations({})}
+    assert charts["Pass rate per concern"].value_format == "percent"
+    assert charts["Failed cases"].value_format is None
