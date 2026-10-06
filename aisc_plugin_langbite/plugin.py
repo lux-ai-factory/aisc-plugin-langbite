@@ -50,6 +50,17 @@ def outcome(global_records: list, cases: list) -> dict:
     return {"global_evaluation": global_records, "cases": cases, "status": "success"}
 
 
+#: what the engine stores of a measure's description; past it the engine refuses the run's measures
+DESCRIPTION_MAX = 255
+
+
+def clip(text: str | None, limit: int = DESCRIPTION_MAX) -> str | None:
+    """`text` within `limit` characters, ending in an ellipsis when it was cut."""
+    if text is None or len(text) <= limit:
+        return text
+    return text[:limit - 1].rstrip() + "…"
+
+
 # The model under test is the evaluation's target, reached through its endpoint in Manage: the platform
 # sets AISC_TARGET_* for the run, which langbite's AISCTarget model reads. The judge keeps its own
 # fields in the form (judge_model, judge_api_key), so it is never pointed at the target.
@@ -176,6 +187,13 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
         return outcome(global_records, langbite.cases())
 
     # ── Metrics (ported from the MLA-BiTe plugin, rebranded LangBiTe) ──────────
+    def export_metrics(self, *args, **kwargs) -> list[Measure]:
+        """Every measure, with its description within what the engine stores (DESCRIPTION_MAX)."""
+        measures = super().export_metrics(*args, **kwargs)
+        for m in measures:
+            m.description = clip(m.description)
+        return measures
+
     @metric("Failed cases")
     def export_failed_cases(self, evaluation_output: dict) -> list[Measure]:
         """Every answer of every failed case, as the target gave it: what the results dashboard lists under
@@ -191,6 +209,7 @@ class LangBiteEvaluationPlugin(BaseEvaluationPlugin[ConfigFormSchema]):
             for answer in case.get("responses", []):
                 measures.append(Measure(name="Failed cases", score=1.0, description=str(case.get("template", "")),
                                         dimensions={**self._row_dimensions(row),
+                                                    "template": str(case.get("template", "")),
                                                     "prompt": str(answer.get("prompt", "")),
                                                     "response": str(answer.get("response", "")),
                                                     "expected": expected}))
